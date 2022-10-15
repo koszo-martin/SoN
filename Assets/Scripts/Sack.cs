@@ -14,10 +14,6 @@ public class Sack : NetworkBehaviour
         gameObject.GetComponent<Image>().color = Player.Instance.color;
     }
 
-    public void turnInSack(){
-        
-    }
-
     public override void OnStartClient(){
         base.OnStartClient();
         Instance = this;

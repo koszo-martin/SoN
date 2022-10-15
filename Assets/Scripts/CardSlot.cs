@@ -28,13 +28,24 @@ public class CardSlot : MonoBehaviour
             Color tempColor = image.color;
             tempColor.a = 1f;
             image.color = tempColor;
+            if(gameObject.GetComponent<Button>() != null){
+                gameObject.GetComponent<Button>().interactable = true;
+            }
         }else{
             image.sprite = null;
             Color tempColor = image.color;
             tempColor.a = 0f;
             image.color = tempColor;
+            if(gameObject.GetComponent<Button>() != null){
+                gameObject.GetComponent<Button>().interactable = false;
+            }
         }
         
+    }
+
+    public void retrieve(){
+        Player.Instance.cards.Add(Player.Instance.sack[index]);
+        Player.Instance.sack.RemoveAt(index);
     }
     
 

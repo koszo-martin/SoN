@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using FishNet.Object;
 using FishNet.Object.Synchronizing;
 using FishNet.Connection;
+using FirstGearGames.LobbyAndWorld.Clients;
 
 public class Player : NetworkBehaviour
 {
@@ -30,7 +31,7 @@ public class Player : NetworkBehaviour
     public string cardName;
 
     [field: SyncVar]
-    public Color color = Color.white;
+    public Color color;
 
     [SyncObject]
     public readonly SyncList<Card> stash = new SyncList<Card>();
@@ -43,32 +44,21 @@ public class Player : NetworkBehaviour
 
     public int thrownCards;
 
-    public override void OnStartServer(){
-        base.OnStartServer();
-        GameManager.Instance.players.Add(this);
+    public void addToManager(){
+        serverAddToManager(this, GameManager.Instance);
     }
 
-    public override void OnStopServer(){
-        base.OnStopServer();
-        GameManager.Instance.players.Remove(this);
+    [ServerRpc (RequireOwnership = false )]
+    private void serverAddToManager(Player player, GameManager gameManager){
+        Debug.Log("Adding player");
+        if(gameManager.players.Contains(player)) return;
+        gameManager.players.Add(player);
     }
 
     public override void OnStartClient(){
         base.OnStartClient();
-
         if(!IsOwner) return;
         Instance = this;
-        score = 0;
-        thrownCards = 0;
-        color=Color.white;
-        setCardName("cheese");
-        addCoin(50);
-        ViewManager.Instance.Initialize();
-    }
-
-    [ServerRpc(RequireOwnership = false)]
-    public void serverSetIsReady(bool value){
-        isReady = value;
     }
 
     [TargetRpc]
@@ -83,20 +73,25 @@ public class Player : NetworkBehaviour
 
     [TargetRpc]
     private void targetStartGame(NetworkConnection networkConnection){
+        score = 0;
+        thrownCards = 0;
+        setCardName("cheese");
+        addCoin(50);
+        setUsername(ClientInstance.ReturnClientInstance(Owner).PlayerSettings.GetUsername());
+        ViewManager.Instance.Initialize();
         ViewManager.Instance.Show<GameView>();
         UIManager.Instance.startGame();
     }
 
     [ServerRpc (RequireOwnership = false)]
-    public void endGame(){
-        setScore();
-        targetEndGame(Owner);
+    public void endGame(GameManager gameManager){
+        targetEndGame(Owner, gameManager);
     }
 
     [TargetRpc]
-    private void targetEndGame(NetworkConnection networkConnection){
+    private void targetEndGame(NetworkConnection networkConnection, GameManager gameManager){
         ViewManager.Instance.Show<EndView>();
-        UIManager.Instance.endGame();
+        UIManager.Instance.endGame(gameManager);
     }
 
     [ServerRpc (RequireOwnership = false)]
@@ -185,14 +180,6 @@ public class Player : NetworkBehaviour
     public void targetDeactivateHaggleMenu(NetworkConnection networkConnection){
         if(HaggleMenu.Instance){
             HaggleMenu.Instance.gameObject.SetActive(false);
-        }
-    }
-
-    [ServerRpc (RequireOwnership = false)]
-    private void setScore(){
-        score = coins;
-        foreach (Card card in stash){
-            score += card.value;
         }
     }
 }

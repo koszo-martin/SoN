@@ -13,10 +13,6 @@ public sealed class GameManager : NetworkBehaviour
 
     [field: SyncObject, SerializeField]
     public SyncList<Player> players { get; } = new SyncList<Player>();
-    [field: SyncVar]
-    public bool canStart { get; private set; }
-    [field: SyncVar]
-    public bool didStart { get; private set; }
 
     [field: SyncObject]
     public SyncList<Color> colors { get; } = new SyncList<Color>();
@@ -26,59 +22,80 @@ public sealed class GameManager : NetworkBehaviour
     [SyncVar]
     public int turn;
 
-    private void Awake()
+    public override void OnStartClient()
     {
+        base.OnStartClient();
         Instance = this;
         setTurn(0);
-    }
-
-    [Server]
-    public void initColors()
-    {
-        addColor(Color.red);
-        addColor(Color.black);
-        addColor(Color.green);
-        addColor(Color.yellow);
-        addColor(Color.blue);
-        addColor(Color.magenta);
+        InitPlayers();
+        initColors();
     }
 
     [ServerRpc(RequireOwnership = false)]
-    private void addColor(Color color)
+    public void InitPlayers()
     {
-        colors.Add(color);
+        observerAddPlayers();
+        Debug.Log(players.Count);
     }
 
-    private void Update()
+    public void initColors()
     {
-        if (!IsServer) return;
-        canStart = allReady();
+        addColor(Color.red, GameManager.Instance);
+        addColor(Color.black, GameManager.Instance);
+        addColor(Color.green, GameManager.Instance);
+        addColor(Color.yellow, GameManager.Instance);
+        addColor(Color.blue, GameManager.Instance);
+        addColor(Color.magenta, GameManager.Instance);
     }
 
-    [Server]
+    [ServerRpc(RequireOwnership = false)]
+    private void addColor(Color color, GameManager gameManager)
+    {
+        if (!gameManager.colors.Contains(color))
+        {
+            gameManager.colors.Add(color);
+        }
+    }
+
+    [ObserversRpc]
+    private void observerAddPlayers()
+    {
+        Player.Instance.addToManager();
+    }
+
     public void startGame()
     {
-        didStart = true;
-        setPlayerColors();
-        startRound();
+        setPlayerColors(GameManager.Instance);
+        startRoundServer(GameManager.Instance, UIManager.Instance);
     }
 
-    [ServerRpc (RequireOwnership = false)]
     public void startRound()
     {
-        if(checkForGameEnd()){
-            endGame();
-            return;
+        if (checkForGameEnd())
+        {
+            calculateScores(GameManager.Instance);
+            endGame(GameManager.Instance);
         }
+        else
+        {
+            startRoundServer(GameManager.Instance, UIManager.Instance);
+        }
+
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void startRoundServer(GameManager gameManager, UIManager uiManager)
+    {
+        Debug.Log(gameManager.players.Count);
         int lowestSheriffCount = 5;
-        foreach (Player player in players)
+        foreach (Player player in gameManager.players)
         {
             if (player.beenSheriff < lowestSheriffCount)
             {
                 lowestSheriffCount = player.beenSheriff;
             }
         }
-        foreach (Player player in players)
+        foreach (Player player in gameManager.players)
         {
             bool isSheriff = (player.beenSheriff == lowestSheriffCount);
             if (isSheriff) lowestSheriffCount = 10;
@@ -88,34 +105,48 @@ public sealed class GameManager : NetworkBehaviour
             player.targetSetSheriff(player.Owner, isSheriff);
             player.startGame();
         }
-        startTurn();
+        startTurn(gameManager, uiManager);
     }
 
     [ServerRpc(RequireOwnership = false)]
-    public void startTurn()
+    public void startTurn(GameManager gameManager, UIManager uiManager)
     {
-        if (turn < players.Count)
+        if (gameManager.turn < gameManager.players.Count)
         {
-            players[turn].startTurn();
+            gameManager.players[gameManager.turn].startTurn();
         }
         else
         {
-            UIManager.Instance.targetActivateNextButton(findSheriff().Owner);
+            uiManager.targetActivateNextButton(findSheriff().Owner);
         }
 
     }
 
     [ServerRpc(RequireOwnership = false)]
-    public void endTurn()
+    public void endTurn(GameManager gameManager)
     {
-        players[turn].endTurn();
+        gameManager.players[gameManager.turn].endTurn();
     }
 
     [ServerRpc(RequireOwnership = false)]
-    public void endGame()
+    public void calculateScores(GameManager gameManager)
     {
-        foreach (Player player in players){
-            player.endGame();
+        foreach (Player player in gameManager.players)
+        {
+            player.score = player.coins;
+            foreach (Card card in player.stash)
+            {
+                player.score += card.value;
+            }
+        }
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void endGame(GameManager gameManager)
+    {
+        foreach (Player player in gameManager.players)
+        {
+            player.endGame(gameManager);
         }
     }
 
@@ -126,14 +157,14 @@ public sealed class GameManager : NetworkBehaviour
         {
             player.goSackOpen();
         }
-        initSacks();
+        initSacks(SackContainer.Instance);
     }
 
-    public void initSacks()
+    public void initSacks(SackContainer sackContainer)
     {
         for (int i = 0; i < players.Count; i++)
         {
-            SackContainer.Instance.localSacks[i].initalize(i);
+            sackContainer.localSacks[i].initalize(i);
         }
     }
 
@@ -150,12 +181,12 @@ public sealed class GameManager : NetworkBehaviour
     }
 
     [ServerRpc(RequireOwnership = false)]
-    public void setPlayerColors()
+    public void setPlayerColors(GameManager gameManager)
     {
-        foreach (Player player in players)
+        foreach (Player player in gameManager.players)
         {
-            player.color = colors[0];
-            colors.RemoveAt(0);
+            player.color = gameManager.colors[0];
+            gameManager.colors.RemoveAt(0);
         }
     }
 
@@ -202,9 +233,11 @@ public sealed class GameManager : NetworkBehaviour
         turn++;
     }
 
-    private bool checkForGameEnd(){
+    private bool checkForGameEnd()
+    {
         bool result = true;
-        foreach (Player player in players){
+        foreach (Player player in players)
+        {
             if (player.beenSheriff < 2) result = false;
         }
         return result;

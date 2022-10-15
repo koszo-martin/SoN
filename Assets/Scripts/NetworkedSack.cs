@@ -67,7 +67,8 @@ public class NetworkedSack : NetworkBehaviour
     }
 
     public void initalize(int number){
-        if(InstanceFinder.IsClient && GameManager.Instance.players[number].isSheriff != true){
+        if(GameManager.Instance.players[number].isSheriff != true){
+            Debug.Log("Client active:" + InstanceFinder.IsClient);
             cards.Clear();
             foreach (Card card in GameManager.Instance.players[number].sack){
                 addCard(card);
@@ -85,7 +86,7 @@ public class NetworkedSack : NetworkBehaviour
             sheriffPenalty();
         }
         empty();
-        activateNextButtonIfAllEmpty();
+        activateNextButtonIfAllEmpty(SackContainer.Instance, UIManager.Instance, GameManager.Instance);
     }
 
     private bool checkInside(){
@@ -140,7 +141,7 @@ public class NetworkedSack : NetworkBehaviour
             owner.addStash(card);
         }
         empty();
-        activateNextButtonIfAllEmpty();
+        activateNextButtonIfAllEmpty(SackContainer.Instance, UIManager.Instance, GameManager.Instance);
     }
 
     [ObserversRpc]
@@ -149,15 +150,15 @@ public class NetworkedSack : NetworkBehaviour
     }
 
     [ServerRpc (RequireOwnership = false)]
-    private void activateNextButtonIfAllEmpty(){
+    private void activateNextButtonIfAllEmpty(SackContainer sackContainer, UIManager uiManager, GameManager gameManager){
         bool allEmpty = true;
-        foreach(NetworkedSack sack in SackContainer.Instance.localSacks){
+        foreach(NetworkedSack sack in sackContainer.localSacks){
             if(sack.cards.Count != 0 ){
                 allEmpty = false;
             }
         }
         if(allEmpty){
-            UIManager.Instance.targetActivateNextButtonSheriffView(GameManager.Instance.findSheriff().Owner);
+            uiManager.targetActivateNextButtonSheriffView(gameManager.findSheriff().Owner);
         }
     }
 

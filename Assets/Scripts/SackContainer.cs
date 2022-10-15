@@ -14,13 +14,13 @@ public class SackContainer : NetworkBehaviour
     }
 
     void Update(){
-        foreach (NetworkedSack sack in localSacks){
-            if (sack.owner == null){
-                sack.gameObject.SetActive(false);
-            }else{
-                sack.gameObject.SetActive(true);
-            }
-        }
+        // foreach (NetworkedSack sack in localSacks){
+        //     if (sack.owner == null){
+        //         sack.gameObject.SetActive(false);
+        //     }else{
+        //         sack.gameObject.SetActive(true);
+        //     }
+        // }
     }
 
 }
