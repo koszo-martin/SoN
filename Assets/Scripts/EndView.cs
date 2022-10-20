@@ -11,11 +11,7 @@ public class EndView : View
 
     public override void Initialize(){
         exitButton.onClick.AddListener(() => {
-            if(InstanceFinder.IsServer){
-                InstanceFinder.ServerManager.StopConnection(true);
-            }else{
-                InstanceFinder.ClientManager.StopConnection();
-            }
+            Application.Quit();
         });
         base.Initialize();
     }

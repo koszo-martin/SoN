@@ -9,18 +9,19 @@ public class SackContainer : NetworkBehaviour
     public static SackContainer Instance {get; private set;}
     public List<NetworkedSack> localSacks = new List<NetworkedSack>();
 
-    private void Awake(){
+    public override void OnStartClient(){
+        base.OnStartClient();
         Instance = this;
     }
 
     void Update(){
-        // foreach (NetworkedSack sack in localSacks){
-        //     if (sack.owner == null){
-        //         sack.gameObject.SetActive(false);
-        //     }else{
-        //         sack.gameObject.SetActive(true);
-        //     }
-        // }
+        foreach (NetworkedSack sack in localSacks){
+            if (sack.owner == null){
+                sack.gameObject.SetActive(false);
+            }else{
+                sack.gameObject.SetActive(true);
+            }
+        }
     }
 
 }

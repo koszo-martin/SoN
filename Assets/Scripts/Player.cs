@@ -71,12 +71,15 @@ public class Player : NetworkBehaviour
         targetStartGame(Owner);
     }
 
+    [ServerRpc (RequireOwnership = false)]
+    public void setScore(int value){
+        this.score = value;
+    }
+
     [TargetRpc]
     private void targetStartGame(NetworkConnection networkConnection){
-        score = 0;
         thrownCards = 0;
         setCardName("cheese");
-        addCoin(50);
         setUsername(ClientInstance.ReturnClientInstance(Owner).PlayerSettings.GetUsername());
         ViewManager.Instance.Initialize();
         ViewManager.Instance.Show<GameView>();

@@ -1,6 +1,5 @@
 ﻿using FirstGearGames.LobbyAndWorld.Demos.KingOfTheHill;
 using FirstGearGames.LobbyAndWorld.Lobbies.JoinCreateRoomCanvases;
-using FirstGearGames.LobbyAndWorld.Clients;
 using FishNet;
 using FishNet.Connection;
 using FishNet.Managing.Scened;
@@ -159,13 +158,7 @@ namespace FirstGearGames.LobbyAndWorld.Lobbies
         [ServerRpc(RequireOwnership = false)]
         private void CmdSetReady(bool ready, NetworkConnection sender = null)
         {
-            NetworkObject client = sender.FirstObject;
-            foreach(NetworkObject netobject in sender.Objects){
-                    if(netobject.GetComponent<ClientInstance>() != null){
-                        client = netobject;
-                    }
-                }
-            SetReady(ready, client, true);
+            SetReady(ready, sender.FirstObject, true);
         }
          
         /// <summary>
@@ -177,7 +170,6 @@ namespace FirstGearGames.LobbyAndWorld.Lobbies
             //Running on server.
             if (asServer)
             {
-                Debug.Log("SET READY server");
                 RoomDetails roomDetails;
                 //Not in a room.
                 if (!base.ConnectionRooms.TryGetValue(changingPlayer.Owner, out roomDetails))
@@ -207,7 +199,6 @@ namespace FirstGearGames.LobbyAndWorld.Lobbies
             //Running on client.
             else
             {
-                Debug.Log("SET READY client");
                 if (ready)
                     _clientReadyPlayers.Add(changingPlayer);
                 else
@@ -258,13 +249,7 @@ namespace FirstGearGames.LobbyAndWorld.Lobbies
         {
             /* If self that left then clear ready players.
              * Otherwise remove leaving player. */
-            NetworkObject client = InstanceFinder.ClientManager.Connection.FirstObject;
-            foreach(NetworkObject netobject in InstanceFinder.ClientManager.Connection.Objects){
-                    if(netobject.GetComponent<ClientInstance>() != null){
-                        client = netobject;
-                    }
-                }
-            if (obj == client)
+            if (obj == InstanceFinder.ClientManager.Connection.FirstObject)
                 _clientReadyPlayers.Clear();
             else
                 _clientReadyPlayers.Remove(obj);

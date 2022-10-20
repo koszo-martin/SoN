@@ -12,13 +12,15 @@ public class NetworkedSack : NetworkBehaviour
     [field: SyncObject, SerializeField]
     public readonly SyncList<Card> cards = new SyncList<Card>();
 
-    [field: SyncVar]
+    public ShowCase showcase;
+
+    [SyncVar, SerializeField]
     public Player owner = null;
 
     [SyncVar, SerializeField]
     public string cardName;
 
-    [SyncVar]
+    [SyncVar, SerializeField]
     public Color color;
 
     [SerializeField]
@@ -31,7 +33,6 @@ public class NetworkedSack : NetworkBehaviour
 
     public Button returnButton;
 
-    [ServerRpc(RequireOwnership = false)]
     public void addCard(Card card){
         cards.Add(card);
     }
@@ -55,30 +56,26 @@ public class NetworkedSack : NetworkBehaviour
         }
     }
 
-    [ServerRpc(RequireOwnership = false)]
     public void setOwner(Player owner){
+        Debug.Log("Owner: " + owner);
         this.owner = owner;
         this.color = owner.color;
+        
     }
 
-    [ServerRpc(RequireOwnership = false)]
     public void setCardName(string cardName){
         this.cardName = cardName;
     }
 
-    public void initalize(int number){
-        if(GameManager.Instance.players[number].isSheriff != true){
-            Debug.Log("Client active:" + InstanceFinder.IsClient);
-            cards.Clear();
-            foreach (Card card in GameManager.Instance.players[number].sack){
-                addCard(card);
-            }
-            setOwner(GameManager.Instance.players[number]);
-            setCardName(GameManager.Instance.players[number].cardName);
-        }
+    [ServerRpc (RequireOwnership = false)]
+    public void addToShowcase(Card card){
+        this.showcase.cards.Add(card);
     }
 
     public void open(){
+        foreach (Card card in cards){
+            addToShowcase(card);
+        }
         bool result = checkInside();
         if (result == false){
             playerPenalty();

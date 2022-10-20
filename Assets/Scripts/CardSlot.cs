@@ -11,6 +11,9 @@ public class CardSlot : MonoBehaviour
 {
     public int index;
     public string parentName;
+
+    public Button throwButton1;
+    public Button throwButton2;
     void Update()
     {
         
@@ -24,21 +27,21 @@ public class CardSlot : MonoBehaviour
         }
         Image image = gameObject.GetComponent<Image>();
         if(index <= cards.Count-1 ){
-            image.sprite = Resources.Load<Sprite>("Sprites/" + cards[index].cardName);
+            Sprite cardSprite = null;
+            foreach( Sprite sprite in UIManager.Instance.sprites){
+                if(sprite.name == cards[index].cardName){
+                    cardSprite = sprite;
+                }
+            }
+            image.sprite = cardSprite;
             Color tempColor = image.color;
             tempColor.a = 1f;
             image.color = tempColor;
-            if(gameObject.GetComponent<Button>() != null){
-                gameObject.GetComponent<Button>().interactable = true;
-            }
         }else{
             image.sprite = null;
             Color tempColor = image.color;
             tempColor.a = 0f;
             image.color = tempColor;
-            if(gameObject.GetComponent<Button>() != null){
-                gameObject.GetComponent<Button>().interactable = false;
-            }
         }
         
     }
@@ -52,6 +55,7 @@ public class CardSlot : MonoBehaviour
     public void putInSack()
     {
         moveToOtherContainerLocal(Player.Instance, 5);
+        UIManager.Instance.deactivateThrowButtons();
     }
 
     private void moveToOtherContainerLocal(Player player, int maxCards)

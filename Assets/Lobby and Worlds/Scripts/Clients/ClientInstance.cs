@@ -83,12 +83,8 @@ namespace FirstGearGames.LobbyAndWorld.Clients
              * null. */
             if (InstanceFinder.IsServer && conn != null)
             {
-                foreach(NetworkObject netobject in conn.Objects){
-                    if(netobject.GetComponent<ClientInstance>() != null){
-                        return netobject.GetComponent<ClientInstance>();
-                    }
-                }
-                return null;
+                NetworkObject nob = conn.FirstObject;
+                return (nob == null) ? null : nob.GetComponent<ClientInstance>();
             }
             //If not server or connection is null, then is client.
             else

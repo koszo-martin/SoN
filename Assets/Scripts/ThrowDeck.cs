@@ -45,6 +45,7 @@ public class ThrowDeck : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     private void addCard(Card card)
     {
+        Debug.Log(card.cardName);
         cards.Add(card);
     }
 }

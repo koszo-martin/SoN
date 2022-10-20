@@ -66,6 +66,13 @@ public sealed class GameManager : NetworkBehaviour
     public void startGame()
     {
         setPlayerColors(GameManager.Instance);
+        Deck.Instance.createDeck(Deck.Instance);
+        Deck.Instance.shuffle(Deck.Instance);
+        Deck.Instance.initThrowDecks(Deck.Instance, Deck.Instance.throwDeck1, Deck.Instance.throwDeck2);
+        foreach(Player player in players){
+            player.addCoin(50);
+            player.setScore(0);
+        }
         startRoundServer(GameManager.Instance, UIManager.Instance);
     }
 
@@ -139,6 +146,105 @@ public sealed class GameManager : NetworkBehaviour
                 player.score += card.value;
             }
         }
+        Player first = null;
+        int firstCount = 0;
+        Player second = null;
+        int secoundCount = 0;
+        foreach(Player player in gameManager.players){
+            int count = 0;
+            foreach (Card card in player.stash)
+            {
+                if(card.cardName == "apples") count +=1;
+                if(card.cardName == "green apples") count +=2;
+                if(card.cardName == "golden apples") count +=3;
+            }
+            if(count > firstCount){
+                second = first;
+                secoundCount = firstCount;
+                first = player;
+                firstCount = count;
+            }
+            if(count > secoundCount){
+                second = player;
+                secoundCount = count;
+            }
+        }
+        if(first != null) first.score += 20;
+        if(second != null) second.score += 10;
+        first = null;
+        firstCount = 0;
+        second = null;
+        secoundCount = 0;
+        foreach(Player player in gameManager.players){
+            int count = 0;
+            foreach (Card card in player.stash)
+            {
+                if(card.cardName == "cheese") count +=1;
+                if(card.cardName == "gouda cheese") count +=2;
+                if(card.cardName == "bleu cheese") count +=3;
+            }
+            if(count > firstCount){
+                second = first;
+                secoundCount = firstCount;
+                first = player;
+                firstCount = count;
+            }
+            if(count > secoundCount){
+                second = player;
+                secoundCount = count;
+            }
+        }
+        if(first != null) first.score += 15;
+        if(second != null) second.score += 10;
+        first = null;
+        firstCount = 0;
+        second = null;
+        secoundCount = 0;
+        foreach(Player player in gameManager.players){
+            int count = 0;
+            foreach (Card card in player.stash)
+            {
+                if(card.cardName == "bread") count +=1;
+                if(card.cardName == "rye bread") count +=2;
+                if(card.cardName == "brickel bread") count +=3;
+            }
+            if(count > firstCount){
+                second = first;
+                secoundCount = firstCount;
+                first = player;
+                firstCount = count;
+            }
+            if(count > secoundCount){
+                second = player;
+                secoundCount = count;
+            }
+        }
+        if(first != null) first.score += 15;
+        if(second != null) second.score += 10;
+        first = null;
+        firstCount = 0;
+        second = null;
+        secoundCount = 0;
+        foreach(Player player in gameManager.players){
+            int count = 0;
+            foreach (Card card in player.stash)
+            {
+                if(card.cardName == "chicken") count +=1;
+                if(card.cardName == "royal rooster") count +=2;
+            }
+            if(count > firstCount){
+                second = first;
+                secoundCount = firstCount;
+                first = player;
+                firstCount = count;
+            }
+            if(count > secoundCount){
+                second = player;
+                secoundCount = count;
+            }
+        }
+        if(first != null) first.score += 10;
+        if(second != null) second.score += 5;
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -157,14 +263,24 @@ public sealed class GameManager : NetworkBehaviour
         {
             player.goSackOpen();
         }
-        initSacks(SackContainer.Instance);
+        initSacks(SackContainer.Instance, GameManager.Instance);
     }
 
-    public void initSacks(SackContainer sackContainer)
+    [ServerRpc (RequireOwnership = false)]
+    public void initSacks(SackContainer sackContainer, GameManager gameManager)
     {
-        for (int i = 0; i < players.Count; i++)
+        for (int i = 0; i < gameManager.players.Count; i++)
         {
-            sackContainer.localSacks[i].initalize(i);
+            sackContainer.localSacks[i].showcase.cards.Clear();
+            if(gameManager.players[i].isSheriff != true){
+            sackContainer.localSacks[i].cards.Clear();
+            foreach (Card card in gameManager.players[i].sack){
+                sackContainer.localSacks[i].cards.Add(card);
+            }
+            Debug.Log(gameManager.players[i]);
+            sackContainer.localSacks[i].setOwner(gameManager.players[i]);
+            sackContainer.localSacks[i].setCardName(gameManager.players[i].cardName);
+        }
         }
     }
 

@@ -10,4 +10,6 @@ public class Card : ScriptableObject
     public int value;
     public int penalty;
     public string cardName;
+
+    public int numberInDeck;
 }

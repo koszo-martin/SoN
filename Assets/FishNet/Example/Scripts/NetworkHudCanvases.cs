@@ -26,37 +26,6 @@ public class NetworkHudCanvases : MonoBehaviour
     [Tooltip("What connections to automatically start on play.")]
     [SerializeField]
     private AutoStartType _autoStartType = AutoStartType.Disabled;
-    /// <summary>
-    /// Color when socket is stopped.
-    /// </summary>
-    [Tooltip("Color when socket is stopped.")]
-    [SerializeField]
-    private Color _stoppedColor;
-    /// <summary>
-    /// Color when socket is changing.
-    /// </summary>
-    [Tooltip("Color when socket is changing.")]
-    [SerializeField]
-    private Color _changingColor;
-    /// <summary>
-    /// Color when socket is started.
-    /// </summary>
-    [Tooltip("Color when socket is started.")]
-    [SerializeField]
-    private Color _startedColor;
-    [Header("Indicators")]
-    /// <summary>
-    /// Indicator for server state.
-    /// </summary>
-    [Tooltip("Indicator for server state.")]
-    [SerializeField]
-    private Image _serverIndicator;
-    /// <summary>
-    /// Indicator for client state.
-    /// </summary>
-    [Tooltip("Indicator for client state.")]
-    [SerializeField]
-    private Image _clientIndicator;
     #endregion
 
     #region Private.
@@ -131,9 +100,6 @@ public class NetworkHudCanvases : MonoBehaviour
         BaseInputModule inputModule = FindObjectOfType<BaseInputModule>();
         if (inputModule == null)
             gameObject.AddComponent<StandaloneInputModule>();
-#else
-        _serverIndicator.transform.parent.gameObject.SetActive(false);
-        _clientIndicator.transform.parent.gameObject.SetActive(false);
 #endif
 
         _networkManager = FindObjectOfType<NetworkManager>();
@@ -144,8 +110,6 @@ public class NetworkHudCanvases : MonoBehaviour
         }
         else
         {
-            UpdateColor(LocalConnectionState.Stopped, ref _serverIndicator);
-            UpdateColor(LocalConnectionState.Stopped, ref _clientIndicator);
             _networkManager.ServerManager.OnServerConnectionState += ServerManager_OnServerConnectionState;
             _networkManager.ClientManager.OnClientConnectionState += ClientManager_OnClientConnectionState;
         }
@@ -166,36 +130,15 @@ public class NetworkHudCanvases : MonoBehaviour
         _networkManager.ClientManager.OnClientConnectionState -= ClientManager_OnClientConnectionState;
     }
 
-    /// <summary>
-    /// Updates img color baased on state.
-    /// </summary>
-    /// <param name="state"></param>
-    /// <param name="img"></param>
-    private void UpdateColor(LocalConnectionState state, ref Image img)
-    {
-        Color c;
-        if (state == LocalConnectionState.Started)
-            c = _startedColor;
-        else if (state == LocalConnectionState.Stopped)
-            c = _stoppedColor;
-        else
-            c = _changingColor;
-
-        img.color = c;
-    }
-
-
     private void ClientManager_OnClientConnectionState(ClientConnectionStateArgs obj)
     {
         _clientState = obj.ConnectionState;
-        UpdateColor(obj.ConnectionState, ref _clientIndicator);
     }
 
 
     private void ServerManager_OnServerConnectionState(ServerConnectionStateArgs obj)
     {
         _serverState = obj.ConnectionState;
-        UpdateColor(obj.ConnectionState, ref _serverIndicator);
     }
 
 

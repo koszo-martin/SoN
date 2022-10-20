@@ -15,10 +15,21 @@ public class NetworkedCardSlot : NetworkBehaviour
 
     void Update()
     {
-        SyncList<Card> cards = parent.GetComponent<NetworkedSack>().cards;
+        SyncList<Card> cards = new SyncList<Card>();
+        if(parent.GetComponent<ShowCase>() != null){
+            cards = parent.GetComponent<ShowCase>().cards;
+        }else{
+            cards = parent.GetComponent<ThrowDeck>().cards;
+        }
         Image image = gameObject.GetComponent<Image>();
         if(index <= cards.Count-1 ){
-            image.sprite = Resources.Load<Sprite>("Sprites/" + cards[index].cardName);
+            Sprite cardSprite = null;
+            foreach( Sprite sprite in UIManager.Instance.sprites){
+                if(sprite.name == cards[index].cardName){
+                    cardSprite = sprite;
+                }
+            }
+            image.sprite = cardSprite;
             Color tempColor = image.color;
             tempColor.a = 1f;
             image.color = tempColor;

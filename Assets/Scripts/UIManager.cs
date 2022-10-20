@@ -19,11 +19,13 @@ public class UIManager : NetworkBehaviour
 
     public GameObject sheriffViewNextButton;
 
-    public List<Button> ownCardButtons;
+    public List<GameObject> ownCardSlots;
 
     public List<Button> sackButtons;
 
     public Text scoreBoard;
+
+    public List<Sprite> sprites;
 
     public void Awake()
     {
@@ -51,20 +53,27 @@ public class UIManager : NetworkBehaviour
             ownCardsObject.SetActive(true);
             endTurnButtonObject.SetActive(true);
             nextButtonObject.SetActive(false);
-            foreach (Button button in ownCardButtons)
+            foreach (GameObject obj in ownCardSlots)
             {
-                button.interactable = false;
+                obj.GetComponent<Button>().interactable = false;
             }
             foreach (Button button in sackButtons)
             {
                 button.interactable = false;
             }
             sackObject.GetComponent<Image>().color = Player.Instance.color;
-            while (Player.Instance.cards.Count < 6)
-            {
-                Deck.Instance.draw();
-            }
         }
+    }
+
+    public void deactivateThrowButtons(){
+        foreach (GameObject obj in ownCardSlots)
+            {
+                obj.GetComponent<CardSlot>().throwButton1.interactable = false;
+                obj.GetComponent<CardSlot>().throwButton2.interactable = false;
+            }
+        deckButton.interactable = false;
+        throwdeck1Button.interactable = false;
+        throwdeck2Button.interactable = false;
     }
 
     public void startTurn()
@@ -78,15 +87,21 @@ public class UIManager : NetworkBehaviour
             deckButton.interactable = true;
             throwdeck1Button.interactable = true;
             throwdeck2Button.interactable = true;
-            foreach (Button button in ownCardButtons)
+            foreach (GameObject obj in ownCardSlots)
             {
-                button.interactable = true;
+                obj.GetComponent<Button>().interactable = true;
             }
             foreach (Button button in sackButtons)
             {
                 button.interactable = true;
             }
+            GameManager.Instance.cardNameDropDown.interactable = true;
             endTurnButtonObject.SetActive(true);
+            foreach (GameObject obj in ownCardSlots)
+            {
+                obj.GetComponent<CardSlot>().throwButton1.interactable = true;
+                obj.GetComponent<CardSlot>().throwButton2.interactable = true;
+            }
         }
     }
 
@@ -97,14 +112,15 @@ public class UIManager : NetworkBehaviour
         throwdeck2Button.interactable = false;
         if (!Player.Instance.isSheriff)
         {
-            foreach (Button button in ownCardButtons)
+            foreach (GameObject obj in ownCardSlots)
             {
-                button.interactable = false;
+                obj.GetComponent<Button>().interactable = false;
             }
             foreach (Button button in sackButtons)
             {
                 button.interactable = false;
             }
+            GameManager.Instance.cardNameDropDown.interactable = false;
             endTurnButtonObject.SetActive(false);
         }
         GameManager.Instance.increaseTurn();
@@ -113,9 +129,18 @@ public class UIManager : NetworkBehaviour
 
     public void endGame(GameManager gameManager)
     {
+        List<Player> players = new List<Player>();
         foreach (Player player in gameManager.players)
         {
-            scoreBoard.text += (player.username + ": " + player.score + "\r\n");
+            players.Add(player);
+        }
+        players.Sort((p1, p2) =>
+        {
+            return p2.score.CompareTo(p1.score);
+        });
+        for (int i = 0; i < players.Count; i++)
+        {
+            scoreBoard.text += (i+1 + ". " + players[i].username + ": " + players[i].score + "\r\n");
         }
     }
 

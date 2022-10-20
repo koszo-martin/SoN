@@ -13,12 +13,14 @@ public class Deck : NetworkBehaviour
     public static Deck Instance { get; private set; }
 
     public int maxCards;
-    public Card prefab;
+    public List<Card> prefabs;
+
+    public ThrowDeck throwDeck1;
+    public ThrowDeck throwDeck2;
 
     public override void OnStartClient()
     {
         base.OnStartClient();
-        createDeck(this);
         Instance = this;
     }
 
@@ -34,15 +36,46 @@ public class Deck : NetworkBehaviour
     }
 
     [ServerRpc(RequireOwnership = false)]
-    private void createDeck(Deck deck)
+    public void createDeck(Deck deck)
     {
         Debug.Log("create Deck");
         if (deck.cards.Count == 0)
         {
-            for (int i = 0; i < 20; i++)
+            foreach (Card card in prefabs)
             {
-                addCard(prefab, deck);
+                for (int i = 0; i < card.numberInDeck; i++)
+                {
+                    deck.cards.Add(card);
+                }
             }
+        }
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void shuffle(Deck deck)
+    {
+        Debug.Log("shuffling");
+        int count = deck.cards.Count;
+        Debug.Log("Count: " + count);
+        int last = count - 1;
+        for (int i = 0; i < last; ++i)
+        {
+            int r = UnityEngine.Random.Range(i, count);
+            Card tmp = deck.cards[i];
+            deck.cards[i] = deck.cards[r];
+            deck.cards[r] = tmp;
+        }
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void initThrowDecks(Deck deck, ThrowDeck throwDeck1, ThrowDeck throwDeck2)
+    {
+        for (int i = 0; i < 5; i++)
+        {
+            throwDeck1.cards.Add(deck.cards[0]);
+            deck.cards.RemoveAt(0);
+            throwDeck2.cards.Add(deck.cards[0]);
+            deck.cards.RemoveAt(0);
         }
     }
 

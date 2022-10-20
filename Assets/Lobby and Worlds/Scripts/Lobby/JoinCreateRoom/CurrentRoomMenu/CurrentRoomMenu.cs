@@ -3,8 +3,6 @@ using FirstGearGames.LobbyAndWorld.Extensions;
 using FirstGearGames.LobbyAndWorld.Global;
 using FirstGearGames.LobbyAndWorld.Global.Canvases;
 using FishNet;
-using FishNet.Connection;
-using FishNet.Object;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -223,13 +221,7 @@ namespace FirstGearGames.LobbyAndWorld.Lobbies.JoinCreateRoomCanvases
             DestroyMemberEntries();
             UpdateStartButton();
 
-            NetworkObject client = InstanceFinder.ClientManager.Connection.FirstObject;
-            foreach(NetworkObject netobject in InstanceFinder.ClientManager.Connection.Objects){
-                    if(netobject.GetComponent<ClientInstance>() != null){
-                        client = netobject;
-                    }
-                }
-            bool host = LobbyNetwork.IsRoomHost(roomDetails, client);
+            bool host = LobbyNetwork.IsRoomHost(roomDetails, InstanceFinder.ClientManager.Connection.FirstObject);
             //Add current members to content.
             for (int i = 0; i < roomDetails.MemberIds.Count; i++)
             {
@@ -238,7 +230,7 @@ namespace FirstGearGames.LobbyAndWorld.Lobbies.JoinCreateRoomCanvases
                 /* Set kick active if member isnt self, match hasnt already started,
                  * and if host. */
                 entry.SetKickActive(
-                    roomDetails.MemberIds[i] != client &&
+                    roomDetails.MemberIds[i] != InstanceFinder.ClientManager.Connection.FirstObject &&
                     host &&
                     !roomDetails.IsStarted
                     );
@@ -253,13 +245,7 @@ namespace FirstGearGames.LobbyAndWorld.Lobbies.JoinCreateRoomCanvases
         private void UpdateStartButton()
         {
             string startFailedString = string.Empty;
-            NetworkObject client = InstanceFinder.ClientManager.Connection.FirstObject;
-            foreach(NetworkObject netobject in InstanceFinder.ClientManager.Connection.Objects){
-                    if(netobject.GetComponent<ClientInstance>() != null){
-                        client = netobject;
-                    }
-                }
-            _startButton.interactable = LobbyNetwork.CanUseStartButton(LobbyNetwork.CurrentRoom, client);
+            _startButton.interactable = LobbyNetwork.CanUseStartButton(LobbyNetwork.CurrentRoom, InstanceFinder.ClientManager.Connection.FirstObject);
         }
 
         /// <summary>
@@ -296,13 +282,7 @@ namespace FirstGearGames.LobbyAndWorld.Lobbies.JoinCreateRoomCanvases
                 return;
 
             string failedReason = string.Empty;
-            NetworkObject client = InstanceFinder.ClientManager.Connection.FirstObject;
-            foreach(NetworkObject netobject in InstanceFinder.ClientManager.Connection.Objects){
-                    if(netobject.GetComponent<ClientInstance>() != null){
-                        client = netobject;
-                    }
-                }
-            bool result = LobbyNetwork.CanStartRoom(LobbyNetwork.CurrentRoom, client, ref failedReason, false);
+            bool result = LobbyNetwork.CanStartRoom(LobbyNetwork.CurrentRoom, InstanceFinder.ClientManager.Connection.FirstObject, ref failedReason, false);
             if (!result)
             {
                 GlobalManager.CanvasesManager.MessagesCanvas.InfoMessages.ShowTimedMessage(failedReason, MessagesCanvas.BRIGHT_ORANGE);
