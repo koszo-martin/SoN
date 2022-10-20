@@ -1094,7 +1094,6 @@ namespace FirstGearGames.LobbyAndWorld.Lobbies
         {
             if (roomDetails == null || roomDetails.MemberIds == null || roomDetails.MemberIds.Count == 0)
                 return false;
-
             return (roomDetails.MemberIds[0] == clientId);
         }
 

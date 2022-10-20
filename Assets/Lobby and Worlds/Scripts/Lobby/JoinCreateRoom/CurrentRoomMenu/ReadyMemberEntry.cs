@@ -57,7 +57,13 @@ namespace FirstGearGames.LobbyAndWorld.Lobbies.JoinCreateRoomCanvases
              * Host however doesn't need a ready button. They will automatically
              * set ready since they decide when to start the game. */
 
-            NetworkObject localNob = InstanceFinder.ClientManager.Connection.FirstObject;
+            NetworkObject client = InstanceFinder.ClientManager.Connection.FirstObject;
+            foreach(NetworkObject netobject in InstanceFinder.ClientManager.Connection.Objects){
+                    if(netobject.GetComponent<ClientInstance>() != null){
+                        client = netobject;
+                    }
+                }
+            NetworkObject localNob = client;
 
             bool local = (id == localNob);
             //If for local player.
@@ -109,7 +115,13 @@ namespace FirstGearGames.LobbyAndWorld.Lobbies.JoinCreateRoomCanvases
                 return;
 
             //For local client.
-            if (base.MemberId == InstanceFinder.ClientManager.Connection.FirstObject)
+            NetworkObject client = InstanceFinder.ClientManager.Connection.FirstObject;
+            foreach(NetworkObject netobject in InstanceFinder.ClientManager.Connection.Objects){
+                    if(netobject.GetComponent<ClientInstance>() != null){
+                        client = netobject;
+                    }
+                }
+            if (base.MemberId == client)
             {
                 _awaitingReadyResponse = false;
                 Color c = (ready) ? _readyColor : _unreadyColor;
@@ -137,8 +149,15 @@ namespace FirstGearGames.LobbyAndWorld.Lobbies.JoinCreateRoomCanvases
         /// <param name="ready"></param>
         private void SetLocalReady(bool ready)
         {
+            Debug.Log("Set local ready");
             //Don't do anything if not for local client. Only local client should be able to click this anyway.
-            if (base.MemberId != InstanceFinder.ClientManager.Connection.FirstObject)
+            NetworkObject client = InstanceFinder.ClientManager.Connection.FirstObject;
+            foreach(NetworkObject netobject in InstanceFinder.ClientManager.Connection.Objects){
+                    if(netobject.GetComponent<ClientInstance>() != null){
+                        client = netobject;
+                    }
+                }
+            if (base.MemberId != client)
                 return;
             if (_awaitingReadyResponse)
                 return;
