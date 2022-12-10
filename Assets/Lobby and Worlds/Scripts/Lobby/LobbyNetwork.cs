@@ -1018,6 +1018,9 @@ namespace FirstGearGames.LobbyAndWorld.Lobbies
             //Joined room after it started and is lock on start. Shouldn't be possible.
             if (roomDetails.IsStarted && roomDetails.LockOnStart)
                 return false;
+            
+            if (roomDetails.MemberIds.Count < 2)
+                return false;
             /* Not host, and room hasn't started yet.
              * Only host can initialize first start. */
             if (!IsRoomHost(roomDetails, clientId) && !roomDetails.IsStarted)

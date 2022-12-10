@@ -12,6 +12,7 @@ public class ThrowDeck : NetworkBehaviour
 
     public void draw()
     {
+        UIManager.Instance.activateOwnCardButton(Player.Instance.cards.Count);
         if (Player.Instance.cards.Count < 6)
         {
             Player.Instance.cards.Add(cards[0]);
@@ -21,6 +22,7 @@ public class ThrowDeck : NetworkBehaviour
 
     public void throwCard(int index)
     {
+        UIManager.Instance.deactivateOwnCardButton(Player.Instance.cards.Count-1);
         if (Player.Instance.thrownCards < 5)
         {
             moveToOtherContainer(Player.Instance.cards, index);

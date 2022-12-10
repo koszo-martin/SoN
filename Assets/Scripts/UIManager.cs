@@ -53,24 +53,17 @@ public class UIManager : NetworkBehaviour
             ownCardsObject.SetActive(true);
             endTurnButtonObject.SetActive(true);
             nextButtonObject.SetActive(false);
-            foreach (GameObject obj in ownCardSlots)
-            {
-                obj.GetComponent<Button>().interactable = false;
-            }
-            foreach (Button button in sackButtons)
-            {
-                button.interactable = false;
-            }
             sackObject.GetComponent<Image>().color = Player.Instance.color;
         }
     }
 
-    public void deactivateThrowButtons(){
+    public void deactivateThrowButtons()
+    {
         foreach (GameObject obj in ownCardSlots)
-            {
-                obj.GetComponent<CardSlot>().throwButton1.interactable = false;
-                obj.GetComponent<CardSlot>().throwButton2.interactable = false;
-            }
+        {
+            obj.GetComponent<CardSlot>().throwButton1.interactable = false;
+            obj.GetComponent<CardSlot>().throwButton2.interactable = false;
+        }
         deckButton.interactable = false;
         throwdeck1Button.interactable = false;
         throwdeck2Button.interactable = false;
@@ -87,16 +80,14 @@ public class UIManager : NetworkBehaviour
             deckButton.interactable = true;
             throwdeck1Button.interactable = true;
             throwdeck2Button.interactable = true;
-            foreach (GameObject obj in ownCardSlots)
-            {
-                obj.GetComponent<Button>().interactable = true;
-            }
-            foreach (Button button in sackButtons)
-            {
-                button.interactable = true;
-            }
             GameManager.Instance.cardNameDropDown.interactable = true;
             endTurnButtonObject.SetActive(true);
+            for (int i = 0; i< Player.Instance.cards.Count; i++){
+                ownCardSlots[i].GetComponent<Button>().interactable = true;
+            }
+            for (int i = 0; i< Player.Instance.sack.Count; i++){
+                sackButtons[i].interactable = true;
+            }
             foreach (GameObject obj in ownCardSlots)
             {
                 obj.GetComponent<CardSlot>().throwButton1.interactable = true;
@@ -110,16 +101,16 @@ public class UIManager : NetworkBehaviour
         deckButton.interactable = false;
         throwdeck1Button.interactable = false;
         throwdeck2Button.interactable = false;
+        foreach (GameObject obj in ownCardSlots)
+        {
+            obj.GetComponent<Button>().interactable = false;
+        }
+        foreach (Button button in sackButtons)
+        {
+            button.interactable = false;
+        }
         if (!Player.Instance.isSheriff)
         {
-            foreach (GameObject obj in ownCardSlots)
-            {
-                obj.GetComponent<Button>().interactable = false;
-            }
-            foreach (Button button in sackButtons)
-            {
-                button.interactable = false;
-            }
             GameManager.Instance.cardNameDropDown.interactable = false;
             endTurnButtonObject.SetActive(false);
         }
@@ -140,7 +131,7 @@ public class UIManager : NetworkBehaviour
         });
         for (int i = 0; i < players.Count; i++)
         {
-            scoreBoard.text += (i+1 + ". " + players[i].username + ": " + players[i].score + "\r\n");
+            scoreBoard.text += (i + 1 + ". " + players[i].username + ": " + players[i].score + "\r\n");
         }
     }
 
@@ -167,6 +158,26 @@ public class UIManager : NetworkBehaviour
     public void targetActivateNextButtonSheriffView(NetworkConnection networkConnection)
     {
         sheriffViewNextButton.GetComponent<Button>().interactable = true;
+    }
+
+    public void activateSackButton(int index)
+    {
+        sackButtons[index].interactable = true;
+    }
+
+    public void deactivateSackButton(int index)
+    {
+        sackButtons[index].interactable = false;
+    }
+
+    public void activateOwnCardButton(int index)
+    {
+        ownCardSlots[index].GetComponent<Button>().interactable = true;
+    }
+
+    public void deactivateOwnCardButton(int index)
+    {
+        ownCardSlots[index].GetComponent<Button>().interactable = false;
     }
 }
 

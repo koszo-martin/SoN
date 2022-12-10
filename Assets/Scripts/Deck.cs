@@ -26,6 +26,7 @@ public class Deck : NetworkBehaviour
 
     public void draw()
     {
+        UIManager.Instance.activateOwnCardButton(Player.Instance.cards.Count);
         List<Card> ownCards = Player.Instance.cards;
         if (ownCards.Count < 6)
         {
@@ -38,15 +39,12 @@ public class Deck : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     public void createDeck(Deck deck)
     {
-        Debug.Log("create Deck");
-        if (deck.cards.Count == 0)
+
+        foreach (Card card in prefabs)
         {
-            foreach (Card card in prefabs)
+            for (int i = 0; i < card.numberInDeck; i++)
             {
-                for (int i = 0; i < card.numberInDeck; i++)
-                {
-                    deck.cards.Add(card);
-                }
+                deck.cards.Add(card);
             }
         }
     }
@@ -54,9 +52,7 @@ public class Deck : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     public void shuffle(Deck deck)
     {
-        Debug.Log("shuffling");
         int count = deck.cards.Count;
-        Debug.Log("Count: " + count);
         int last = count - 1;
         for (int i = 0; i < last; ++i)
         {

@@ -47,13 +47,17 @@ public class CardSlot : MonoBehaviour
     }
 
     public void retrieve(){
+        UIManager.Instance.deactivateSackButton(Player.Instance.sack.Count-1);
+        UIManager.Instance.activateOwnCardButton(Player.Instance.cards.Count);
         Player.Instance.cards.Add(Player.Instance.sack[index]);
-        Player.Instance.sack.RemoveAt(index);
+        Player.Instance.removeFromSack(index);
     }
     
 
     public void putInSack()
     {
+        UIManager.Instance.deactivateOwnCardButton(Player.Instance.cards.Count-1);
+        UIManager.Instance.activateSackButton(Player.Instance.sack.Count);
         moveToOtherContainerLocal(Player.Instance, 5);
         UIManager.Instance.deactivateThrowButtons();
     }

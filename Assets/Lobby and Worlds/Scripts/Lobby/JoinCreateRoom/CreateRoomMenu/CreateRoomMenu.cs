@@ -32,12 +32,6 @@ namespace FirstGearGames.LobbyAndWorld.Lobbies.JoinCreateRoomCanvases
         [SerializeField]
         private TMP_InputField _passwordText;
         /// <summary>
-        /// Lock On Start toggle.
-        /// </summary>
-        [Tooltip("Lock On Start toggle.")]
-        [SerializeField]
-        private Toggle _lockOnStart;
-        /// <summary>
         /// Dropdown holding player count.
         /// </summary>
         [Tooltip("Dropdown holding player count.")]
@@ -107,7 +101,7 @@ namespace FirstGearGames.LobbyAndWorld.Lobbies.JoinCreateRoomCanvases
             {
                 _awaitingCreateResponse = true;
                 LobbyNetwork.SanitizeTextMeshProString(ref password);
-                LobbyNetwork.CreateRoom(roomName, password, _lockOnStart.isOn, playerCount);
+                LobbyNetwork.CreateRoom(roomName, password, true, playerCount);
             }
         }
 

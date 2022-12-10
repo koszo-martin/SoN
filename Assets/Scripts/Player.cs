@@ -67,13 +67,13 @@ public class Player : NetworkBehaviour
     }
 
     [ServerRpc (RequireOwnership = false)]
-    public void startGame(){
-        targetStartGame(Owner);
+    public void setScore(int value){
+        this.score = value;
     }
 
     [ServerRpc (RequireOwnership = false)]
-    public void setScore(int value){
-        this.score = value;
+    public void startGame(){
+        targetStartGame(Owner);
     }
 
     [TargetRpc]
@@ -136,6 +136,11 @@ public class Player : NetworkBehaviour
     [ServerRpc (RequireOwnership = false)]
     public void addToSack(Card card){
         sack.Add(card);
+    }
+
+    [ServerRpc (RequireOwnership = false)]
+    public void removeFromSack(int index){
+        sack.RemoveAt(index);
     }
 
     [ServerRpc (RequireOwnership = false)]
